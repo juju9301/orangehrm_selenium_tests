@@ -1,0 +1,44 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.pytype/
+
+# IDE/editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Selenium/driver artifacts
+chromedriver.exe
+chromedriver
+geckodriver*
+**/chromedriver*
+
+# Selenium run artifacts
+reports/
+screenshots/
+downloads/
+allure-results/
+
+# Local notes and scratch files
+notes
+*.log
+
+# Local environment/config overrides
+.env
+.env.*
+!.env.example
