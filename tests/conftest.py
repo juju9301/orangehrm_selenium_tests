@@ -5,8 +5,15 @@ from dotenv import load_dotenv
 import os
 
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
+
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.edge.service import Service as EdgeService
+from selenium.webdriver.firefox.service import Service as FirefoxService
+
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
@@ -34,21 +41,44 @@ def chrome_options() -> Options:
     return options
 
 @pytest.fixture
-def browser():
-    driver = webdriver.Chrome(service=Service(), options=chrome_options())
-    driver.set_page_load_timeout(3)
-    yield driver
-    driver.quit()
+def driver():
+    # Get browser name from env variables, default to chrome
+    browser_name = os.getenv('BROWSER', 'chrome').lower().strip()
+
+    if browser_name == 'chrome':
+        service = ChromeService(ChromeDriverManager().install())
+        driver_instance = webdriver.Chrome(service=service, options=chrome_options())
+
+    elif browser_name == 'edge':
+        service = EdgeService(EdgeChromiumDriverManager().install())
+        driver_instance = webdriver.Edge(service=service)
+
+    elif browser_name == 'firefox':
+        service = FirefoxService(GeckoDriverManager().install())
+        driver_instance = webdriver.Firefox(service=service)
+
+    else:
+        raise ValueError(f"Unsupported browser: {browser_name}")
+
+    driver_instance.maximize_window()
+    driver_instance.set_page_load_timeout(5)
+
+    yield driver_instance
+    driver_instance.quit()
+
 
 @pytest.fixture
-def login_page(browser):
-    page = LoginPage(browser, BASE_URL)
+def login_page(driver):
+    page = LoginPage(driver, BASE_URL)
     page.open()
     return page
 
 @pytest.fixture
 def dashboard_page(login_page):
-    login_page.login(os.getenv('ORANGEHRM_USERNAME'), os.getenv('ORANGEHRM_PASSWORD'))
+    login_page.login(
+        os.getenv('ORANGEHRM_USERNAME', ''),
+        os.getenv('ORANGEHRM_PASSWORD', ''),
+    )
     return DashboardPage(login_page.driver, login_page.base_url)
 
 
