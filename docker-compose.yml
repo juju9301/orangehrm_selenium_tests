@@ -1,0 +1,27 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  orangehrm:
+    image: apache/orangehrm:latest
+    container_name: orangehrm-container
+    depends_on:
+      - mysql
+    ports:
+      - "80:80"
+    environment:
+      ORANGEHRM_DATABASE_HOST: mysql
+      ORANGEHRM_DATABASE_PORT: 3306
+      ORANGEHRM_DATABASE_NAME: orangehrm
+      ORANGEHRM_DATABASE_USERNAME: root
+      ORANGEHRM_DATABASE_PASSWORD: my-secret-pw
+
+volumes:
+  mysql-data:

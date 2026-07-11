@@ -16,6 +16,25 @@ This repository contains a Selenium + pytest suite for the OrangeHRM demo applic
 
 A `src/` layout is most useful when you are packaging a reusable Python library. For a Selenium test project, keeping the test code and page objects at the repository root is simpler and more idiomatic, especially because pytest can run directly from the repo.
 
+## Prerequisites
+
+This suite expects the OrangeHRM demo application to be running locally before tests are executed.
+
+### Docker prerequisites
+
+The repository includes a Docker Compose setup for the required services:
+
+- MySQL 8.4
+- OrangeHRM latest image
+
+Start them with:
+
+```bash
+docker compose up -d
+```
+
+If you only want the database container, you can still use the MySQL service from the same file.
+
 ## Run tests
 
 Activate the virtual environment and run:
