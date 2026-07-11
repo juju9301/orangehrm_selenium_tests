@@ -5,23 +5,36 @@ from ..pages.base_page import BasePage
 
 class TopbarComponent(BasePage):
     TOPBAR_BODY = (By.CSS_SELECTOR, '')
-    # PAGE_TITLE = (By.CSS_SELECTOR, "h6[data-v-7b563373='']")
     PAGE_TITLE = (By.CLASS_NAME, 'oxd-topbar-header-title')
     USER_NAME = (By.CSS_SELECTOR, 'p.oxd-userdropdown-name')
     USER_IMG = (By.CSS_SELECTOR, 'img.oxd-userdropdown-img')
+
+    """Dropdown elements"""
     DROPDOWN_ICON = (By.CSS_SELECTOR, 'i.oxd-userdropdown-icon')
     DROPDOWN_MENU = (By.CSS_SELECTOR, 'ul.oxd-dropdown-menu')
+    DROPDOWN_ITEMS = (By.CSS_SELECTOR, 'ul.oxd-dropdown-menu li')
     ABOUT_LINK = (By.CSS_SELECTOR, 'ul.oxd-dropdown-menu li:nth-child(1)')
-    # ABOUT_LINK = (By.LINK_TEXT, '#', 'About')
     SUPPORT_LINK = (By.CSS_SELECTOR, 'ul.oxd-dropdown-menu li:nth-child(2)')
-    # SUPPORT_LINK = (By.LINK_TEXT, 'href="/web/index.php/help/support"', 'Support')
-    CHANGE_PASSWORD = (By.CSS_SELECTOR, 'ul.oxd-dropdown-menu li:nth-child(3)')
-    # CHANGE_PASSWORD = (By.LINK_TEXT, '/web/index.php/pim/updatePassword', 'Change Password')
-    LOGOUT = (By.CSS_SELECTOR, 'ul.oxd-dropdown-menu li:nth-child(4)')
-    # 'Logout', 'href="/web/index.php/auth/logout"'
+    CHANGE_PASSWORD_LINK = (By.CSS_SELECTOR, 'ul.oxd-dropdown-menu li:nth-child(3)')
+    LOGOUT_LINK = (By.CSS_SELECTOR, 'ul.oxd-dropdown-menu li:nth-child(4)')
 
     def open_dropdown(self):
-        self.find
+        self.find_visible(*self.DROPDOWN_ICON).click()
+        self.find_visible(*self.DROPDOWN_MENU)
+        return self
+
+    def get_dropdown_items(self):
+        self.find_visible(*self.DROPDOWN_MENU)
+        return [item for item in self.find_all(*self.DROPDOWN_ITEMS)]
+    
+    def get_dropdown_text(self):
+        return [item.text for item in self.get_dropdown_items()]
+    
+    def get_dropdown_hrefs(self):
+        return [item.find_element(By.TAG_NAME, 'a').get_attribute('href') 
+                for item in self.get_dropdown_items()]
+    
+
 
 
     
