@@ -1,6 +1,10 @@
 import pytest
+import os
+from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
 
+
+load_dotenv()
 
 expected_items = [
     (0, "About", "#"),
@@ -12,7 +16,7 @@ expected_items = [
 def test_topbar_visible(dashboard_page):
     topbar = dashboard_page.topbar
     topbar.open_dropdown()
-    assert dashboard_page.find(*topbar.USER_NAME).text == 'Ivan Kovresov'
+    assert dashboard_page.find(*topbar.USER_NAME).text == os.getenv("ORANGEHRM_FULL_NAME")
 
 @pytest.mark.parametrize('index, expected_text, expected_href', expected_items)
 def test_dropdown_elements(dashboard_page, index, expected_text, expected_href):
