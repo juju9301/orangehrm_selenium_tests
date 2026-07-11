@@ -4,7 +4,7 @@ from ..pages.base_page import BasePage
 
 
 class TopbarComponent(BasePage):
-    TOPBAR_BODY = (By.CSS_SELECTOR, '')
+    # TOPBAR_BODY = (By.CSS_SELECTOR, '')
     PAGE_TITLE = (By.CLASS_NAME, 'oxd-topbar-header-title')
     USER_NAME = (By.CSS_SELECTOR, 'p.oxd-userdropdown-name')
     USER_IMG = (By.CSS_SELECTOR, 'img.oxd-userdropdown-img')

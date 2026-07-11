@@ -6,6 +6,8 @@ from selenium.common.exceptions import TimeoutException
 
 
 class BasePage:
+    BODY = (By.TAG_NAME, "body")
+
     def __init__(self, driver: WebDriver, base_url: str, timeout: int = 10):
         self.driver = driver
         self.base_url = base_url
@@ -72,6 +74,9 @@ class BasePage:
         element = self.wait_clickable(by, locator)
         element.click()
         return element #return element for access to it, otherwise it's lost after the action 
+    
+    def click_elsewhere(self):
+        self.find(*self.BODY).click()
     
     def fill(self, by: ByType, locator: str, text: str):
         element = self.find_visible(by, locator)
