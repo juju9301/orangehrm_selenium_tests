@@ -4,13 +4,16 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 
+from orangehrm.config import BASE_URL
 
 class BasePage:
     BODY = (By.TAG_NAME, "body")
+    PATH = ''
 
-    def __init__(self, driver: WebDriver, base_url: str, timeout: int = 10):
+    def __init__(self, driver: WebDriver, base_url: str = BASE_URL, timeout: int = 10):
         self.driver = driver
         self.base_url = base_url
+        self.url = self.base_url + self.PATH
         self.wait = WebDriverWait(driver, timeout)
     
     """Navigation methods"""
@@ -67,6 +70,10 @@ class BasePage:
 
     def wait_invisible(self, by: ByType, locator: str):
         return self.wait.until(EC.invisibility_of_element_located((by, locator)))
+    
+    def wait_for_url_change(self, old_url: str):
+        self.wait.until(EC.url_changes(old_url))
+        return self.driver.current_url
     
     """Actions"""
 

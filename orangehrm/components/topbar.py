@@ -1,7 +1,9 @@
+from typing import Literal
 from selenium.webdriver.common.by import By, ByType
 
-from ..pages.base_page import BasePage
+from orangehrm.pages.base_page import BasePage
 
+dropdown_option = Literal["about", "support", "change_password", "logout"]
 
 class TopbarComponent(BasePage):
     # TOPBAR_BODY = (By.CSS_SELECTOR, '')
@@ -17,6 +19,13 @@ class TopbarComponent(BasePage):
     SUPPORT_LINK = (By.CSS_SELECTOR, 'ul.oxd-dropdown-menu li:nth-child(2)')
     CHANGE_PASSWORD_LINK = (By.CSS_SELECTOR, 'ul.oxd-dropdown-menu li:nth-child(3)')
     LOGOUT_LINK = (By.CSS_SELECTOR, 'ul.oxd-dropdown-menu li:nth-child(4)')
+
+    OPTIONS = {
+    "about": ABOUT_LINK,
+    "support": SUPPORT_LINK,
+    "change_password": CHANGE_PASSWORD_LINK,
+    "logout": LOGOUT_LINK,
+}
 
     def open_dropdown(self):
         self.find_visible(*self.DROPDOWN_ICON).click()
@@ -34,6 +43,10 @@ class TopbarComponent(BasePage):
         return [item.find_element(By.TAG_NAME, 'a').get_attribute('href') 
                 for item in self.get_dropdown_items()]
     
+    def click_option(self, option: dropdown_option):
+        locator = self.OPTIONS[option]
+        self.open_dropdown()
+        self.click(*locator)
 
 
 

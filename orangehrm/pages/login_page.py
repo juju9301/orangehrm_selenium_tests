@@ -7,6 +7,10 @@ class LoginPage(BasePage):
     PASSWORD_FLD = (By.NAME, 'password')
     SUBMIT_BTN = (By.CSS_SELECTOR, 'button[type="submit"]')
 
+    ALERT_SECTION = (By.CSS_SELECTOR, 'div.orangehrm-login-error')
+    ALERT_ICON = (By.CSS_SELECTOR, 'i[data-v-bddebfba=""]')
+    ALERT_MESSAGE = (By.CSS_SELECTOR, 'p.oxd-alert-content-text')
+
     def open(self):
         return self.go_to(self.PATH)
     
@@ -15,4 +19,5 @@ class LoginPage(BasePage):
         self.fill(*self.PASSWORD_FLD, text=password)
         self.click(*self.SUBMIT_BTN)
         return self
+    
     
