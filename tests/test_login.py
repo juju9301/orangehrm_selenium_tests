@@ -46,16 +46,16 @@ def test_successful_login(login_page, valid_credentials):
     ],
 )
 def test_credentials_are_empty(
-    login_page, username, password, expect_visible, expect_hidden
+    login_page, username, password, expected_visible, expected_hidden
 ):
     login_page.login(username=username, password=password)
 
     assert login_page.current_url == login_page.url
 
-    for locator in expect_visible:
+    for locator in expected_visible:
         assert login_page.is_visible(*locator)
 
-    for locator in expect_hidden:
+    for locator in expected_hidden:
         assert not login_page.is_visible(*locator)
 
 

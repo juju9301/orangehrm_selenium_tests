@@ -21,7 +21,7 @@ class LoginPage(BasePage):
     ERRORS = (By.CSS_SELECTOR, "span.oxd-input-field-error-message")
 
     ALERT_SECTION = (By.CSS_SELECTOR, "div.orangehrm-login-error")
-    ALERT_ICON = (By.CSS_SELECTOR, "i[@data-v-bddebfba='']")
+    ALERT_ICON = (By.CSS_SELECTOR, "i[data-v-bddebfba='']")
     ALERT_MESSAGE = (By.CSS_SELECTOR, "p.oxd-alert-content-text")
 
     def open(self):

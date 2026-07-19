@@ -11,7 +11,7 @@ class BasePage:
     BODY = (By.TAG_NAME, "body")
     PATH = ""
 
-    def __init__(self, driver: WebDriver, base_url: str = BASE_URL, timeout: int = 10):
+    def __init__(self, driver: WebDriver, base_url: str = BASE_URL, timeout: int = 5):
         self.driver = driver
         self.base_url = base_url
         self.url = self.base_url + self.PATH
