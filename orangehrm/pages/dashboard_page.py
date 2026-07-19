@@ -4,5 +4,3 @@ from ..components.topbar import TopbarComponent
 
 class DashboardPage(BasePage):
     PATH = "/dashboard/index"
-
-

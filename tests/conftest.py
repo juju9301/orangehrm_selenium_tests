@@ -15,46 +15,49 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
-
 from orangehrm.pages.login_page import LoginPage
 from orangehrm.pages.dashboard_page import DashboardPage
 from orangehrm.config import BASE_URL
 
+ROOT_DIR = Path(__file__).resolve().parents[1]
+
 load_dotenv()
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def check_orangehrm_is_up():
     # Check if Orangehrm Docker container is running
     url = "http://localhost:80"
     try:
         requests.get(url, timeout=2)
     except Exception:
-        pytest.exit("OrangeHRM is not reachable. Docker containers are down", returncode=1)
+        pytest.exit(
+            "OrangeHRM is not reachable. Docker containers are down", returncode=1
+        )
 
 
 def chrome_options() -> Options:
     options = Options()
-    options.add_argument('--start-maximized')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--no-sandbox')
+    options.add_argument("--start-maximized")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
     return options
+
 
 @pytest.fixture
 def driver():
     # Get browser name from env variables, default to chrome
-    browser_name = os.getenv('BROWSER', 'chrome').lower().strip()
+    browser_name = os.getenv("BROWSER", "chrome").lower().strip()
 
-    if browser_name == 'chrome':
+    if browser_name == "chrome":
         service = ChromeService(ChromeDriverManager().install())
         driver_instance = webdriver.Chrome(service=service, options=chrome_options())
 
-    elif browser_name == 'edge':
+    elif browser_name == "edge":
         service = EdgeService(EdgeChromiumDriverManager().install())
         driver_instance = webdriver.Edge(service=service)
 
-    elif browser_name == 'firefox':
+    elif browser_name == "firefox":
         service = FirefoxService(GeckoDriverManager().install())
         driver_instance = webdriver.Firefox(service=service)
 
@@ -74,22 +77,22 @@ def login_page(driver):
     page.open()
     return page
 
+
 @pytest.fixture
 def dashboard_page(login_page):
     login_page.login(
-        os.getenv('ORANGEHRM_USERNAME', ''),
-        os.getenv('ORANGEHRM_PASSWORD', ''),
+        os.getenv("ORANGEHRM_USERNAME", ""),
+        os.getenv("ORANGEHRM_PASSWORD", ""),
     )
     return DashboardPage(login_page.driver, login_page.base_url)
 
 
 @pytest.fixture
 def valid_credentials():
-    username = os.getenv('ORANGEHRM_USERNAME')
-    password = os.getenv('ORANGEHRM_PASSWORD')
+    username = os.getenv("ORANGEHRM_USERNAME")
+    password = os.getenv("ORANGEHRM_PASSWORD")
 
-    assert username, 'ORANGEHRM_USERNAME is not set'
-    assert password, 'ORANGEHRM_PASSWORD is not set'
+    assert username, "ORANGEHRM_USERNAME is not set"
+    assert password, "ORANGEHRM_PASSWORD is not set"
 
     return username, password
-
