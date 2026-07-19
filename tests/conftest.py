@@ -23,6 +23,7 @@ from orangehrm.config import BASE_URL
 
 load_dotenv()
 
+
 @pytest.fixture(scope='session', autouse=True)
 def check_orangehrm_is_up():
     # Check if Orangehrm Docker container is running
@@ -82,4 +83,13 @@ def dashboard_page(login_page):
     return DashboardPage(login_page.driver, login_page.base_url)
 
 
-  
+@pytest.fixture
+def valid_credentials():
+    username = os.getenv('ORANGEHRM_USERNAME')
+    password = os.getenv('ORANGEHRM_PASSWORD')
+
+    assert username, 'ORANGEHRM_USERNAME is not set'
+    assert password, 'ORANGEHRM_PASSWORD is not set'
+
+    return username, password
+

@@ -3,13 +3,20 @@ from .base_page import BasePage
 
 class LoginPage(BasePage):
     PATH = '/auth/login'
-    USERNAME_FLD = (By.NAME, 'username')
-    PASSWORD_FLD = (By.NAME, 'password')
-    SUBMIT_BTN = (By.CSS_SELECTOR, 'button[type="submit"]')
+    USERNAME_FLD = (By.NAME, "username")
+    PASSWORD_FLD = (By.NAME, "password")
+    SUBMIT_BTN = (By.CSS_SELECTOR, "button[type='submit']")
 
-    ALERT_SECTION = (By.CSS_SELECTOR, 'div.orangehrm-login-error')
-    ALERT_ICON = (By.CSS_SELECTOR, 'i[data-v-bddebfba=""]')
-    ALERT_MESSAGE = (By.CSS_SELECTOR, 'p.oxd-alert-content-text')
+    """Form error elements"""
+
+    USERNAME_ERROR = (By.XPATH, "//input[@name='username']/ancestor::div[contains(@class, 'oxd-input-group')]//span")
+    PASSWORD_ERROR = (By.XPATH, "//input[@name='password']/ancestor::div[contains(@class, 'oxd-input-group')]//span")
+    ERRORS = (By.CSS_SELECTOR, "span.oxd-input-field-error-message")
+
+    ALERT_SECTION = (By.CSS_SELECTOR, "div.orangehrm-login-error")
+    ALERT_ICON = (By.CSS_SELECTOR, "i[@data-v-bddebfba='']")
+    ALERT_MESSAGE = (By.CSS_SELECTOR, "p.oxd-alert-content-text")
+
 
     def open(self):
         return self.go_to(self.PATH)

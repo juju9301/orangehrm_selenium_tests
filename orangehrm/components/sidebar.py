@@ -9,8 +9,14 @@ class SidebarComponent(BasePage):
                      'Claim', 'Buzz']
     SEARCH_FLD = (By.CSS_SELECTOR, 'input[placeholder="Search"]')
     MENU_ITEMS = (By.CSS_SELECTOR, 'ul.oxd-main-menu li')
-    SIDEBAR_ITEMS = [(By.CSS_SELECTOR, f'ul.oxd-main-menu li:nth-chaild({n+1})') for n in range(len(SIDEBAR_NAMES))]
 
     def get_sidebar_item(self, name: str):
-        name_index = self.SIDEBAR_NAMES.index(name)
-        return self.SIDEBAR_ITEMS[name_index + 1]
+        for item in self.find_all(*self.MENU_ITEMS):
+            if item.text.strip() == name:
+                return item
+        raise ValueError(f'Sidebar item {name} cannot be found')
+        
+    def click_sidebar_item(self, name: str):
+        item = self.get_sidebar_item(name)
+        item.click()
+        return item

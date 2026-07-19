@@ -129,6 +129,9 @@ class BasePage:
     @property
     def cookies(self):
         return self.driver.get_cookies()
+    
+    def get_cookie(self, name: str):
+        return self.driver.get_cookie(name)
 
 
 
