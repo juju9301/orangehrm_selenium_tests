@@ -21,6 +21,21 @@ class TopbarComponent(BasePage):
     CHANGE_PASSWORD_LINK = (By.CSS_SELECTOR, "ul.oxd-dropdown-menu li:nth-child(3)")
     LOGOUT_LINK = (By.CSS_SELECTOR, "ul.oxd-dropdown-menu li:nth-child(4)")
 
+    PAGE_TITLE_NAMES = {
+        "Admin": "Admin / User Management",
+        "PIM": "PIM",
+        "Leave": "Leave / Configure",
+        "Time": "Time",
+        "Recruitment": "Recruitment",
+        "My Info": "PIM",
+        "Performance": "Performance / Manage Reviews",
+        "Dashboard": "Dashboard",
+        "Directory": "Directory",
+        "Maintenance": "Maintenance / Purge Records",
+        "Claim": "Claim",
+        "Buzz": "Buzz",
+    }
+
     OPTIONS = {
         "about": ABOUT_LINK,
         "support": SUPPORT_LINK,
