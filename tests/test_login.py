@@ -12,7 +12,7 @@ def test_title(login_page):
     assert login_page.title == "OrangeHRM"
 
 
-def test_successful_login(login_page, valid_credentials):
+def test_successful_admin_login(login_page, valid_credentials):
     username, password = valid_credentials
     login_page.login(username=username, password=password)
 
@@ -30,7 +30,7 @@ def test_successful_login(login_page, valid_credentials):
             id="both missing",
         ),
         pytest.param(
-            os.getenv("ORANGEHRM_USERNAME", ""),
+            os.getenv("ENABLED_ADMIN_USERNAME", ""),
             "",
             [LoginPage.PASSWORD_ERROR],
             [LoginPage.USERNAME_ERROR],
@@ -38,7 +38,7 @@ def test_successful_login(login_page, valid_credentials):
         ),
         pytest.param(
             "",
-            os.getenv("ORANGEHRM_PASSWORD", ""),
+            os.getenv("ENABLED_ADMIN_PASSWORD", ""),
             [LoginPage.USERNAME_ERROR],
             [LoginPage.PASSWORD_ERROR],
             id="username_missing",
@@ -63,10 +63,10 @@ def test_credentials_are_empty(
     ("username", "password"),
     [
         pytest.param(
-            "random_user123", os.getenv("ORANGEHRM_PASSWORD"), id="wrong_username"
+            "random_user123", os.getenv("ENABLED_ADMIN_PASSWORD"), id="wrong_username"
         ),
         pytest.param(
-            os.getenv("ORANGEHRM_USERNAME"), "random123%", id="wrong_password"
+            os.getenv("ENABLED_ADMIN_USERNAME"), "random123%", id="wrong_password"
         ),
     ],
 )
@@ -134,7 +134,7 @@ def test_redirect_to_dashboard_after_logout_click(login_page, valid_credentials)
     login_page.back()
     assert dashboard.current_url == dashboard.url
 
-    sidebar.click_sidebar_item("Admin")
+    sidebar.click_menu_item("Admin")
     new_url = dashboard.wait_for_url_change(dashboard.url)
     assert new_url == login_page.url
 

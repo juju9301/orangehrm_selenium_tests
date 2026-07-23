@@ -11,7 +11,7 @@ def test_topbar_visible(dashboard_page):
     topbar = dashboard_page.topbar
     topbar.open_dropdown()
     assert dashboard_page.find(*topbar.USER_NAME).text == os.getenv(
-        "ORANGEHRM_FULL_NAME"
+        "ENABLED_ADMIN_FULL_NAME"
     )
 
 

@@ -81,18 +81,18 @@ def login_page(driver):
 @pytest.fixture
 def dashboard_page(login_page):
     login_page.login(
-        os.getenv("ORANGEHRM_USERNAME", ""),
-        os.getenv("ORANGEHRM_PASSWORD", ""),
+        os.getenv("ENABLED_ADMIN_USERNAME", ""),
+        os.getenv("ENABLED_ADMIN_PASSWORD", ""),
     )
     return DashboardPage(login_page.driver, login_page.base_url)
 
 
 @pytest.fixture
 def valid_credentials():
-    username = os.getenv("ORANGEHRM_USERNAME")
-    password = os.getenv("ORANGEHRM_PASSWORD")
+    username = os.getenv("ENABLED_ADMIN_USERNAME")
+    password = os.getenv("ENABLED_ADMIN_PASSWORD")
 
-    assert username, "ORANGEHRM_USERNAME is not set"
-    assert password, "ORANGEHRM_PASSWORD is not set"
+    assert username, "ENABLED_ADMIN_USERNAME is not set"
+    assert password, "ENABLED_ADMIN_PASSWORD is not set"
 
     return username, password
