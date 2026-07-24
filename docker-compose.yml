@@ -1,7 +1,6 @@
 services:
   mysql:
     image: mysql:8.4
-    container_name: mysql-container
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-my-secret-pw}
@@ -21,8 +20,7 @@ services:
       start_period: 20s
 
   orangehrm:
-    image: apache/orangehrm:latest
-    container_name: orangehrm-container
+    image: orangehrm/orangehrm:latest
     restart: unless-stopped
     depends_on:
       mysql:

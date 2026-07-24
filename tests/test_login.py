@@ -8,10 +8,12 @@ from orangehrm.pages.dashboard_page import DashboardPage
 from orangehrm.pages.login_page import LoginPage
 
 
+@pytest.mark.smoke
 def test_title(login_page):
     assert login_page.title == "OrangeHRM"
 
 
+@pytest.mark.smoke
 def test_successful_admin_login(login_page, valid_admin_credentials):
     username, password = valid_admin_credentials
     login_page.login(username=username, password=password)
