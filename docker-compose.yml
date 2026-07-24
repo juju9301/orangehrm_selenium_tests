@@ -2,26 +2,39 @@ services:
   mysql:
     image: mysql:8.4
     container_name: mysql-container
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-my-secret-pw}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-orangehrm}
+      MYSQL_USER: ${MYSQL_USER:-orangehrm}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-orangehrm}
     ports:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+    healthcheck:
+      test:
+        ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
 
   orangehrm:
     image: apache/orangehrm:latest
     container_name: orangehrm-container
+    restart: unless-stopped
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     ports:
       - "80:80"
     environment:
       ORANGEHRM_DATABASE_HOST: mysql
       ORANGEHRM_DATABASE_PORT: 3306
-      ORANGEHRM_DATABASE_NAME: orangehrm
-      ORANGEHRM_DATABASE_USERNAME: root
-      ORANGEHRM_DATABASE_PASSWORD: my-secret-pw
+      ORANGEHRM_DATABASE_NAME: ${MYSQL_DATABASE:-orangehrm}
+      ORANGEHRM_DATABASE_USERNAME: ${MYSQL_USER:-orangehrm}
+      ORANGEHRM_DATABASE_PASSWORD: ${MYSQL_PASSWORD:-orangehrm}
 
 volumes:
   mysql-data:

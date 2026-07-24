@@ -41,6 +41,13 @@ def chrome_options() -> Options:
     options.add_argument("--start-maximized")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
+    options.add_argument("--window-size=1920,1080")
+
+    if os.getenv("CI", "").lower() in {"1", "true", "yes"} or os.getenv(
+        "HEADLESS", "0"
+    ).lower() in {"1", "true", "yes"}:
+        options.add_argument("--headless=new")
+
     return options
 
 

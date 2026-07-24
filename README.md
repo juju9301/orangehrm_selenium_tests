@@ -27,6 +27,8 @@ The repository includes a Docker Compose setup for the required services:
 - MySQL 8.4
 - OrangeHRM latest image
 
+The compose file now creates the database and wires the OrangeHRM container to it automatically using the same environment values stored in the project `.env` file.
+
 Start them with:
 
 ```bash
@@ -34,6 +36,10 @@ docker compose up -d
 ```
 
 If you only want the database container, you can still use the MySQL service from the same file.
+
+### GitHub Actions / CI notes
+
+The CI workflow should start the same compose stack and then run pytest. No manual MySQL setup is required in the runner because the `mysql` service creates the database, user, and password for the `orangehrm` service automatically.
 
 ## Run tests
 
