@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 
 
 class SidebarComponent(BasePage):
-    ADMIN_MENU_ITEMS = (
+    ADMIN_MENU_ITEMS = [
         "Admin",
         "PIM",
         "Leave",
@@ -18,9 +18,9 @@ class SidebarComponent(BasePage):
         "Maintenance",
         "Claim",
         "Buzz",
-    )
+    ]
 
-    ESS_MENU_ITEMS = (
+    ESS_MENU_ITEMS = [
         "Leave",
         "Time",
         "My Info",
@@ -29,7 +29,7 @@ class SidebarComponent(BasePage):
         "Directory",
         "Claim",
         "Buzz",
-    )
+    ]
     SEARCH_INPUT_LOCATOR = (By.CSS_SELECTOR, "input[placeholder='Search']")
     MENU_ITEM_LOCATOR = (By.CSS_SELECTOR, "ul.oxd-main-menu li")
 

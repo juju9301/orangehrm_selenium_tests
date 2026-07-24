@@ -88,7 +88,7 @@ def dashboard_page(login_page):
 
 
 @pytest.fixture
-def valid_credentials():
+def valid_admin_credentials():
     username = os.getenv("ENABLED_ADMIN_USERNAME")
     password = os.getenv("ENABLED_ADMIN_PASSWORD")
 

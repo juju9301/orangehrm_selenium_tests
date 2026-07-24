@@ -12,8 +12,8 @@ def test_title(login_page):
     assert login_page.title == "OrangeHRM"
 
 
-def test_successful_admin_login(login_page, valid_credentials):
-    username, password = valid_credentials
+def test_successful_admin_login(login_page, valid_admin_credentials):
+    username, password = valid_admin_credentials
     login_page.login(username=username, password=password)
 
     assert login_page.current_url.endswith("/dashboard/index")
@@ -79,8 +79,8 @@ def test_credentials_are_incorrect(login_page, username, password):
     assert login_page.get_text(*login_page.ALERT_MESSAGE) == "Invalid credentials"
 
 
-def test_redirect_after_logout(login_page, valid_credentials):
-    username, password = valid_credentials
+def test_redirect_after_logout(login_page, valid_admin_credentials):
+    username, password = valid_admin_credentials
     login_page.login(username=username, password=password)
     dashboard = DashboardPage(login_page.driver)
     topbar = TopbarComponent(dashboard.driver)
@@ -91,8 +91,8 @@ def test_redirect_after_logout(login_page, valid_credentials):
     assert new_url.endswith(login_page.PATH)
 
 
-def test_no_interaction_after_logout(login_page, valid_credentials):
-    username, password = valid_credentials
+def test_no_interaction_after_logout(login_page, valid_admin_credentials):
+    username, password = valid_admin_credentials
     login_page.login(username=username, password=password)
     dashboard = DashboardPage(login_page.driver)
     topbar = TopbarComponent(dashboard.driver)
@@ -120,8 +120,8 @@ def test_no_interaction_after_logout(login_page, valid_credentials):
     reason="Currently the page clicked in logout state gets saved as next",
     strict=True,
 )
-def test_redirect_to_dashboard_after_logout_click(login_page, valid_credentials):
-    username, password = valid_credentials
+def test_redirect_to_dashboard_after_logout_click(login_page, valid_admin_credentials):
+    username, password = valid_admin_credentials
     login_page.login(username=username, password=password)
     dashboard = DashboardPage(login_page.driver)
     topbar = TopbarComponent(dashboard.driver)
@@ -141,3 +141,27 @@ def test_redirect_to_dashboard_after_logout_click(login_page, valid_credentials)
     login_page.login(username=username, password=password)
 
     assert dashboard.current_url == dashboard.url
+
+
+def test_successful_ess_login(login_page):
+    login_page.login(
+        username=os.getenv("ENABLED_ESS_USERNAME"),
+        password=os.getenv("ENABLED_ESS_PASSWORD"),
+    )
+    dashboard = DashboardPage(login_page.driver)
+    sidebar = SidebarComponent(dashboard.driver)
+    assert len(sidebar.find_all_present(*sidebar.MENU_ITEM_LOCATOR)) == len(
+        sidebar.ESS_MENU_ITEMS
+    )
+    assert sidebar.get_visible_menu_item_names() == sidebar.ESS_MENU_ITEMS
+
+
+def test_disabled_ess_login(login_page):
+    login_page.login(
+        username=os.getenv("DISABLED_ESS_USERNAME"),
+        password=os.getenv("DISABLED_ESS_PASSWORD"),
+    )
+    assert login_page.current_url == login_page.url
+    assert login_page.find_visible(*login_page.ALERT_SECTION)
+    assert login_page.find_visible(*login_page.ALERT_ICON)
+    assert login_page.get_text(*login_page.ALERT_MESSAGE) == "Account disabled"
