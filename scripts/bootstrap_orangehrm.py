@@ -1,10 +1,11 @@
 import os
 import sys
 import time
+import traceback
 from pathlib import Path
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
@@ -42,6 +43,22 @@ class OrangeHRMBootstrapper:
 
     def is_login_page(self) -> bool:
         return "/auth/login" in self.driver.current_url
+
+    def load_page(self, url: str, timeout: int = 60) -> None:
+        last_error: Exception | None = None
+
+        for attempt in range(3):
+            try:
+                self.driver.get(url)
+                self.wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+                return
+            except TimeoutException as exc:
+                last_error = exc
+                if attempt < 2:
+                    time.sleep(5)
+
+        if last_error is not None:
+            raise last_error
 
     def wait_for_login(self, timeout: int = 120) -> bool:
         deadline = time.time() + timeout
@@ -141,7 +158,7 @@ class OrangeHRMBootstrapper:
         self.click_next()
 
     def bootstrap(self):
-        self.driver.get(f"{BASE_URL}/installer/index.php/welcome")
+        self.load_page(f"{BASE_URL}/installer/index.php/welcome")
 
         if self.wait_for_login(timeout=5):
             print("OrangeHRM already initialized; login page reachable.")
@@ -184,12 +201,21 @@ class OrangeHRMBootstrapper:
 
 def main() -> int:
     with OrangeHRMBootstrapper() as bootstrapper:
-        return bootstrapper.bootstrap()
+        try:
+            return bootstrapper.bootstrap()
+        except Exception:
+            screenshot_path = ROOT_DIR / "screenshots" / "bootstrap_failure.png"
+            try:
+                bootstrapper.driver.save_screenshot(str(screenshot_path))
+            except Exception:
+                pass
+            raise
 
 
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except Exception as exc:
+        traceback.print_exc(file=sys.stderr)
         print(f"OrangeHRM bootstrap failed: {exc}", file=sys.stderr)
         raise SystemExit(1)
