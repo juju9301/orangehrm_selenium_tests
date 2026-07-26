@@ -72,20 +72,71 @@ class OrangeHRMBootstrapper:
         return False
 
     def click_next(self):
-        self.wait.until(
-            EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Next']"))
-        ).click()
+        locators = [
+            (By.XPATH, "//button[normalize-space()='Next']"),
+            (
+                By.XPATH,
+                "//button[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'next')]",
+            ),
+            (
+                By.XPATH,
+                "//input[@type='submit' and contains(translate(normalize-space(@value), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'next')]",
+            ),
+        ]
+
+        for by, value in locators:
+            try:
+                element = self.wait.until(EC.element_to_be_clickable((by, value)))
+                element.click()
+                return
+            except TimeoutException:
+                continue
+
+        raise TimeoutException("Could not find a clickable 'Next' button")
 
     def click_checkbox(self, text: str):
-        checkbox = self.wait.until(
-            EC.element_to_be_clickable(
-                (
-                    By.XPATH,
-                    f"//input[@type='checkbox'][ancestor::*[contains(., '{text}')]]",
+        normalized_text = text.lower()
+        locators = [
+            (
+                By.XPATH,
+                f"//input[@type='checkbox' and ancestor::*[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{normalized_text}')]]",
+            ),
+            (
+                By.XPATH,
+                f"//*[self::label or self::span or self::div or self::p][contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{normalized_text}')]//input[@type='checkbox']",
+            ),
+            (
+                By.XPATH,
+                f"//input[@type='checkbox'][following::node()[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{normalized_text}')]]",
+            ),
+            (By.CSS_SELECTOR, "input[type='checkbox']"),
+        ]
+
+        for by, value in locators:
+            try:
+                checkboxes = self.wait.until(
+                    lambda driver: [
+                        checkbox
+                        for checkbox in driver.find_elements(by, value)
+                        if checkbox.is_displayed() and checkbox.is_enabled()
+                    ]
                 )
-            )
-        )
-        self.driver.execute_script("arguments[0].click();", checkbox)
+            except TimeoutException:
+                continue
+
+            if not checkboxes:
+                continue
+
+            if len(checkboxes) > 1:
+                for checkbox in checkboxes:
+                    if checkbox.is_displayed() and checkbox.is_enabled():
+                        self.driver.execute_script("arguments[0].click();", checkbox)
+                        return
+            else:
+                self.driver.execute_script("arguments[0].click();", checkboxes[0])
+                return
+
+        raise TimeoutException(f"Could not find a clickable checkbox for: {text}")
 
     def fill_field(self, label: str, value: str):
         xpath = (
