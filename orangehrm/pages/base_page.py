@@ -1,3 +1,5 @@
+from urllib.parse import urlparse, urlunparse
+
 from selenium.webdriver.common.by import By, ByType
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as EC
@@ -7,13 +9,27 @@ from selenium.common.exceptions import TimeoutException
 from orangehrm.config import BASE_URL
 
 
+def normalize_base_url(url: str) -> str:
+    parsed = urlparse(url if "://" in url else f"http://{url}")
+    scheme = parsed.scheme or "http"
+    hostname = parsed.hostname or "localhost"
+    port = parsed.port
+
+    if port is None:
+        port = 80 if scheme == "http" else 443
+
+    netloc = f"{hostname}:{port}"
+    path = (parsed.path or "").rstrip("/")
+    return urlunparse((scheme, netloc, path, "", "", ""))
+
+
 class BasePage:
     BODY = (By.TAG_NAME, "body")
     PATH = ""
 
     def __init__(self, driver: WebDriver, base_url: str = BASE_URL, timeout: int = 5):
         self.driver = driver
-        self.base_url = base_url
+        self.base_url = normalize_base_url(base_url) + "/web/index.php"
         self.url = self.base_url + self.PATH
         self.wait = WebDriverWait(driver, timeout)
 

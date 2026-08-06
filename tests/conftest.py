@@ -17,6 +17,8 @@ from webdriver_manager.firefox import GeckoDriverManager
 
 from orangehrm.pages.login_page import LoginPage
 from orangehrm.pages.dashboard_page import DashboardPage
+from orangehrm.components.sidebar import SidebarComponent
+from orangehrm.components.topbar import TopbarComponent
 from orangehrm.config import BASE_URL
 
 ROOT_DIR = Path(__file__).resolve().parents[1]

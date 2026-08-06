@@ -1,6 +1,5 @@
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.by import By, ByType
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+
 from typing import Literal
 
 from .base_page import BasePage
@@ -38,48 +37,6 @@ class InstallerPage(BasePage):
         self.find(By.XPATH, xpath).click()
         return self
 
-    def click_checkbox(self, text: str):
-        normalized_text = text.lower()
-        locators = [
-            (
-                By.XPATH,
-                f"//input[@type='checkbox' and ancestor::*[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{normalized_text}')]]",
-            ),
-            (
-                By.XPATH,
-                f"//*[self::label or self::span or self::div or self::p][contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{normalized_text}')]//input[@type='checkbox']",
-            ),
-            (
-                By.XPATH,
-                f"//input[@type='checkbox'][following::node()[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{normalized_text}')]]",
-            ),
-        ]
-
-        for by, locator in locators:
-            try:
-                checkboxes = WebDriverWait(self.driver, 4).until(
-                    lambda driver: [
-                        checkbox
-                        for checkbox in driver.find_elements(by, locator)
-                        if checkbox.is_displayed() and checkbox.is_enabled()
-                    ]
-                )
-            except TimeoutException:
-                continue
-
-            if not checkboxes:
-                continue
-
-            for checkbox in checkboxes:
-                if checkbox.is_displayed() and checkbox.is_enabled():
-                    self.driver.execute_script("arguments[0].click();", checkbox)
-                    return self
-
-        if self._js_click_by_text(normalized_text):
-            return self
-
-        raise TimeoutException(f"Could not find a clickable checkbox for: {text}")
-
     def find_dropdown_trigger_by_label(self, label_text: str):
         label_lower = label_text.lower()
         xpath = (
@@ -109,16 +66,12 @@ class InstallerPage(BasePage):
 
     def find_field_by_label(self, label_text: str):
         label_lower = label_text.lower()
-        xpath = f"//label[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{label_lower}')]/ancestor::div[contains(@class, 'oxd-input-group')]//input"
+        xpath = (
+            "//label[contains("
+            "translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), "
+            f"'{label_lower}')]/ancestor::div[contains(@class, 'oxd-input-group')]//input"
+        )
         return self.find_visible(By.XPATH, xpath)
-
-    # def find_checkbox_or_radio_by_label(
-    #     self, element_type: Literal["checkbox", "radio"], label_text: str
-    # ):
-    #     label_lower = label_text.lower()
-    #     # xpath = f"//label[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{label_lower}')]//input[@type='{element_type}']"
-    #     xpath = f"//label[contains(translate(normalize-space(string(.)),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'{label_lower}')]//input[@type='{element_type}']"
-    #     return self.find_visible(By.XPATH, xpath)
 
     def find_checkbox_or_radio_by_label(
         self, element_type: Literal["checkbox", "radio"], label_text: str
@@ -134,35 +87,11 @@ class InstallerPage(BasePage):
         return self.find(By.XPATH, xpath)
 
     def click_checkbox_or_radio(self, element):
+        """The interactable checkbox and radio elements in the UI are being obfuscated,
+        therefore we need to click the label of the input instead of the input itself.
+        Later consider removing this method and modifying the @find_checkbox_or_radio_by_label instead
+        to find the label and interact with it.
+        """
         if not element.is_selected():
             label = element.find_element(By.XPATH, "./parent::label")
             label.click()
-
-    def fill_database_fields(self, values: list[str]):
-        text_inputs = self.driver.find_elements(
-            By.CSS_SELECTOR, "input[type='text'], input[type='password']"
-        )
-        for element, value in zip(text_inputs, values):
-            element.clear()
-            element.send_keys(value)
-        return self
-
-    def _js_click_by_text(self, text: str) -> bool:
-        script = """
-        const target = arguments[0].toLowerCase();
-        const candidates = Array.from(document.querySelectorAll('button, input[type=\"submit\"], input[type=\"button\"], input[type=\"checkbox\"], [role=\"checkbox\"], a'));
-        for (const element of candidates) {
-            const label = (element.innerText || element.value || '').trim().toLowerCase();
-            const context = (element.outerHTML + ' ' + (element.parentElement?.innerText || '') + ' ' + (element.closest('label, div, span, p')?.innerText || '')).toLowerCase();
-            if (!target || label.includes(target) || context.includes(target)) {
-                try {
-                    element.click();
-                    return true;
-                } catch (error) {
-                    // Try next candidate.
-                }
-            }
-        }
-        return false;
-        """
-        return bool(self.driver.execute_script(script, text))

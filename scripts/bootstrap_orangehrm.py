@@ -49,21 +49,21 @@ class OrangeHRMBootstrapper:
     def is_login_page(self) -> bool:
         return "/auth/login" in self.driver.current_url
 
-    def load_page(self, url: str, timeout: int = 60) -> None:
-        last_error: Exception | None = None
+    # def load_page(self, url: str, timeout: int = 60) -> None:
+    #     last_error: Exception | None = None
 
-        for attempt in range(3):
-            try:
-                self.driver.get(url)
-                self.wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-                return
-            except TimeoutException as exc:
-                last_error = exc
-                if attempt < 2:
-                    time.sleep(5)
+    #     for attempt in range(3):
+    #         try:
+    #             self.driver.get(url)
+    #             self.wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+    #             return
+    #         except TimeoutException as exc:
+    #             last_error = exc
+    #             if attempt < 2:
+    #                 time.sleep(5)
 
-        if last_error is not None:
-            raise last_error
+    #     if last_error is not None:
+    #         raise last_error
 
     def wait_for_login(self, timeout: int = 120) -> bool:
         deadline = time.time() + timeout
@@ -254,11 +254,9 @@ class OrangeHRMBootstrapper:
         terms_checkbox = installer.find_checkbox_or_radio_by_label(
             "checkbox", "I accept the terms in the License Agreement"
         )
-        if not terms_checkbox.is_selected():
-            label = terms_checkbox.find_element(By.XPATH, "./parent::label")
-            label.click()
-        # installer.click_checkbox("I accept the terms in the License Agreement")
-        # assert next button
+
+        installer.click_checkbox_or_radio(terms_checkbox)
+
         installer.click_button_by_text("Next")
 
         """

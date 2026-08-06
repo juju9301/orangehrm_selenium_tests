@@ -18,7 +18,7 @@ def test_successful_admin_login(login_page, valid_admin_credentials):
     username, password = valid_admin_credentials
     login_page.login(username=username, password=password)
 
-    assert login_page.current_url.endswith("/dashboard/index")
+    assert login_page.current_url.endswith(DashboardPage.PATH)
 
 
 @pytest.mark.parametrize(
@@ -52,7 +52,7 @@ def test_credentials_are_empty(
 ):
     login_page.login(username=username, password=password)
 
-    assert login_page.current_url == login_page.url
+    assert login_page.current_url.endswith(login_page.PATH)
 
     for locator in expected_visible:
         assert login_page.is_visible(*locator)
@@ -75,7 +75,7 @@ def test_credentials_are_empty(
 def test_credentials_are_incorrect(login_page, username, password):
     login_page.login(username=username, password=password)
 
-    assert login_page.current_url == login_page.url
+    assert login_page.current_url.endswith(login_page.PATH)
     assert login_page.find_visible(*login_page.ALERT_SECTION)
     assert login_page.find_visible(*login_page.ALERT_ICON)
     assert login_page.get_text(*login_page.ALERT_MESSAGE) == "Invalid credentials"
@@ -107,10 +107,10 @@ def test_no_interaction_after_logout(login_page, valid_admin_credentials):
     cookie_after_logout = login_page.get_cookie("_orangehrm")
 
     assert cookie_after_login != cookie_after_logout
-    assert new_url == login_page.url
+    assert new_url.endswith(login_page.PATH)
 
     login_page.back()
-    assert login_page.current_url == dashboard.url
+    assert login_page.current_url.endswith(dashboard.PATH)
 
     topbar.click_option("support")
     new_url1 = dashboard.wait_for_url_change(dashboard.url)
@@ -134,7 +134,7 @@ def test_redirect_to_dashboard_after_logout_click(login_page, valid_admin_creden
 
     assert new_url == login_page.url
     login_page.back()
-    assert dashboard.current_url == dashboard.url
+    assert dashboard.current_url.endswith(dashboard.PATH)
 
     sidebar.click_menu_item("Admin")
     new_url = dashboard.wait_for_url_change(dashboard.url)
@@ -142,7 +142,7 @@ def test_redirect_to_dashboard_after_logout_click(login_page, valid_admin_creden
 
     login_page.login(username=username, password=password)
 
-    assert dashboard.current_url == dashboard.url
+    assert dashboard.current_url.endswith(dashboard.PATH)
 
 
 def test_successful_ess_login(login_page):
@@ -163,7 +163,7 @@ def test_disabled_ess_login(login_page):
         username=os.getenv("DISABLED_ESS_USERNAME"),
         password=os.getenv("DISABLED_ESS_PASSWORD"),
     )
-    assert login_page.current_url == login_page.url
+    assert login_page.current_url.endswith(login_page.PATH)
     assert login_page.find_visible(*login_page.ALERT_SECTION)
     assert login_page.find_visible(*login_page.ALERT_ICON)
     assert login_page.get_text(*login_page.ALERT_MESSAGE) == "Account disabled"

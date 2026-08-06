@@ -3,7 +3,7 @@ from .base_page import BasePage
 
 
 class LoginPage(BasePage):
-    PATH = "/web/index.php/auth/login"
+    PATH = "/auth/login"
     USERNAME_FLD = (By.NAME, "username")
     PASSWORD_FLD = (By.NAME, "password")
     SUBMIT_BTN = (By.CSS_SELECTOR, "button[type='submit']")
