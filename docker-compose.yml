@@ -4,9 +4,10 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-my-secret-pw}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-orangehrm}
-      MYSQL_USER: ${MYSQL_USER:-orangehrm}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-orangehrm}
+      # Let create orangehrm itself the database to avoid getting the "Database already exists" error in fresh installation
+      # MYSQL_DATABASE: ${MYSQL_DATABASE:-orangehrm}
+      # MYSQL_USER: ${MYSQL_USER:-orangehrm}
+      # MYSQL_PASSWORD: ${MYSQL_PASSWORD:-orangehrm}
     ports:
       - "3306:3306"
     volumes:

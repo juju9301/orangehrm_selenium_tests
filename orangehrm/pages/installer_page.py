@@ -1,41 +1,42 @@
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.by import By
+from selenium.webdriver.common.by import By, ByType
 from selenium.webdriver.support.ui import WebDriverWait
+from typing import Literal
 
 from .base_page import BasePage
 
 
 class InstallerPage(BasePage):
     PATH = "/installer/index.php"
-
-    NEXT_BUTTONS = [
-        (By.XPATH, "//button[normalize-space()='Next']"),
-        (
-            By.XPATH,
-            "//button[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'next')]",
-        ),
-        (
-            By.XPATH,
-            "//input[@type='submit' and contains(translate(normalize-space(@value), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'next')]",
-        ),
-    ]
+    OPTIONS_CONTAINER = (By.CSS_SELECTOR, "div.oxd-select-dropdown")
 
     def open_welcome(self):
         self.go_to("/installer/index.php/welcome")
         return self
 
-    def click_next(self):
-        for by, locator in self.NEXT_BUTTONS:
-            try:
-                self.wait_clickable(by, locator).click()
-                return self
-            except TimeoutException:
-                continue
+    def click_button_by_text(self, button_text: str):
+        text_lower = button_text.lower()
 
-        if self._js_click_by_text("next"):
-            return self
+        xpath = (
+            "("
+            # Match <button> elements
+            "//button[contains("
+            "translate(normalize-space(string(.)), "
+            "'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), "
+            f"'{text_lower}'"
+            ")]"
+            " | "
+            # Match <input type='submit'>
+            "//input[@type='submit' and contains("
+            "translate(normalize-space(@value), "
+            "'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), "
+            f"'{text_lower}'"
+            ")]"
+            ")"
+        )
 
-        raise TimeoutException("Could not find a clickable 'Next' button")
+        self.find(By.XPATH, xpath).click()
+        return self
 
     def click_checkbox(self, text: str):
         normalized_text = text.lower()
@@ -79,6 +80,64 @@ class InstallerPage(BasePage):
 
         raise TimeoutException(f"Could not find a clickable checkbox for: {text}")
 
+    def find_dropdown_trigger_by_label(self, label_text: str):
+        label_lower = label_text.lower()
+        xpath = (
+            "//label[contains("
+            "translate(normalize-space(string(.)), "
+            "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), "
+            f"'{label_lower}'"
+            ")]"
+            "/ancestor::div[contains(@class,'oxd-input-group')]"
+            "//div[contains(@class,'oxd-select-text')]"
+        )
+        return self.find_visible(By.XPATH, xpath)
+
+    def select_dropdown_option(self, label_text: str, option_text: str):
+        # Click the dropdown trigger
+        trigger = self.find_dropdown_trigger_by_label(label_text)
+        trigger.click()
+
+        # Wait for dropdown to appear
+        options_container = self.find_visible(*self.OPTIONS_CONTAINER)
+
+        # Click the desired option
+        option = options_container.find_element(
+            By.XPATH, f".//span[normalize-space()='{option_text}']"
+        )
+        option.click()
+
+    def find_field_by_label(self, label_text: str):
+        label_lower = label_text.lower()
+        xpath = f"//label[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{label_lower}')]/ancestor::div[contains(@class, 'oxd-input-group')]//input"
+        return self.find_visible(By.XPATH, xpath)
+
+    # def find_checkbox_or_radio_by_label(
+    #     self, element_type: Literal["checkbox", "radio"], label_text: str
+    # ):
+    #     label_lower = label_text.lower()
+    #     # xpath = f"//label[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{label_lower}')]//input[@type='{element_type}']"
+    #     xpath = f"//label[contains(translate(normalize-space(string(.)),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'{label_lower}')]//input[@type='{element_type}']"
+    #     return self.find_visible(By.XPATH, xpath)
+
+    def find_checkbox_or_radio_by_label(
+        self, element_type: Literal["checkbox", "radio"], label_text: str
+    ):
+        label_lower = label_text.lower()
+        xpath = (
+            "//label[contains("
+            "translate(normalize-space(string(.)), "
+            "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), "
+            f"'{label_lower}'"
+            ")]//input[@type='" + element_type + "']"
+        )
+        return self.find(By.XPATH, xpath)
+
+    def click_checkbox_or_radio(self, element):
+        if not element.is_selected():
+            label = element.find_element(By.XPATH, "./parent::label")
+            label.click()
+
     def fill_database_fields(self, values: list[str]):
         text_inputs = self.driver.find_elements(
             By.CSS_SELECTOR, "input[type='text'], input[type='password']"
@@ -86,21 +145,6 @@ class InstallerPage(BasePage):
         for element, value in zip(text_inputs, values):
             element.clear()
             element.send_keys(value)
-        return self
-
-    def fill_admin_fields(self, full_name: str, username: str, password: str):
-        fields = self.driver.find_elements(
-            By.CSS_SELECTOR, "input[type='text'], input[type='password']"
-        )
-        if len(fields) >= 4:
-            fields[0].clear()
-            fields[0].send_keys(full_name)
-            fields[1].clear()
-            fields[1].send_keys(username)
-            fields[2].clear()
-            fields[2].send_keys(password)
-            fields[3].clear()
-            fields[3].send_keys(password)
         return self
 
     def _js_click_by_text(self, text: str) -> bool:
