@@ -24,7 +24,7 @@ BASE_URL = os.getenv("ORANGEHRM_URL", "http://localhost:80").rstrip("/")
 
 def chrome_options() -> Options:
     options = Options()
-    # options.add_argument("--headless=new")
+    options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1280,800")
