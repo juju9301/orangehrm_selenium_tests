@@ -24,7 +24,7 @@ BASE_URL = os.getenv("ORANGEHRM_URL", "http://localhost:80").rstrip("/")
 
 def chrome_options() -> Options:
     options = Options()
-    options.add_argument("--headless=new")
+    # options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1280,800")
@@ -49,22 +49,6 @@ class OrangeHRMBootstrapper:
     def is_login_page(self) -> bool:
         return "/auth/login" in self.driver.current_url
 
-    # def load_page(self, url: str, timeout: int = 60) -> None:
-    #     last_error: Exception | None = None
-
-    #     for attempt in range(3):
-    #         try:
-    #             self.driver.get(url)
-    #             self.wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-    #             return
-    #         except TimeoutException as exc:
-    #             last_error = exc
-    #             if attempt < 2:
-    #                 time.sleep(5)
-
-    #     if last_error is not None:
-    #         raise last_error
-
     def wait_for_login(self, timeout: int = 120) -> bool:
         deadline = time.time() + timeout
         while time.time() < deadline:
@@ -75,19 +59,6 @@ class OrangeHRMBootstrapper:
                 return True
             time.sleep(2)
         return False
-
-    def dump_debug_state(self, context: str) -> None:
-        try:
-            title = self.driver.title or ""
-            url = self.driver.current_url or ""
-            body_text = self.driver.find_element("tag name", "body").text[:4000]
-        except Exception:
-            title, url, body_text = "", "", ""
-
-        print(
-            f"[bootstrap-debug] {context}\nURL: {url}\nTitle: {title}\nBody: {body_text}",
-            file=sys.stderr,
-        )
 
     def complete_database_config(self, installer: InstallerPage):
 
@@ -248,6 +219,7 @@ class OrangeHRMBootstrapper:
         2. Verify [Next] button is enabled 
         3. Click [Next]
         """
+
         self.wait.until(
             EC.url_contains("/installer/index.php/installer/licence-acceptance")
         )

@@ -1,5 +1,5 @@
-from orangehrm.pages.base_page import BasePage
+from orangehrm.pages.web_page import WebPage
 
 
-class AdminPage(BasePage):
-    PATH = '/admin/viewSystemUsers'
+class AdminPage(WebPage):
+    PATH = "/admin/viewSystemUsers"

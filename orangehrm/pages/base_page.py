@@ -9,29 +9,19 @@ from selenium.common.exceptions import TimeoutException
 from orangehrm.config import BASE_URL
 
 
-def normalize_base_url(url: str) -> str:
-    parsed = urlparse(url if "://" in url else f"http://{url}")
-    scheme = parsed.scheme or "http"
-    hostname = parsed.hostname or "localhost"
-    port = parsed.port
-
-    if port is None:
-        port = 80 if scheme == "http" else 443
-
-    netloc = f"{hostname}:{port}"
-    path = (parsed.path or "").rstrip("/")
-    return urlunparse((scheme, netloc, path, "", "", ""))
-
-
 class BasePage:
     BODY = (By.TAG_NAME, "body")
+    PREFIX = ""
     PATH = ""
 
     def __init__(self, driver: WebDriver, base_url: str = BASE_URL, timeout: int = 5):
         self.driver = driver
-        self.base_url = normalize_base_url(base_url) + "/web/index.php"
-        self.url = self.base_url + self.PATH
+        self.base_url = base_url
+        self.url = self.build_url()
         self.wait = WebDriverWait(driver, timeout)
+
+    def build_url(self):
+        return f"{self.base_url}{self.PREFIX}{self.PATH}"
 
     """Navigation methods"""
 
@@ -90,7 +80,12 @@ class BasePage:
         return self.wait.until(EC.invisibility_of_element_located((by, locator)))
 
     def wait_for_url_change(self, old_url: str):
-        self.wait.until(EC.url_changes(old_url))
+        old_path = urlparse(old_url).path
+        self.wait.until(lambda d: urlparse(d.current_url).path != old_path)
+        return self.driver.current_url
+
+    def wait_for_url_contains(self, target_path):
+        self.wait.until(EC.url_contains(target_path))
         return self.driver.current_url
 
     """Actions"""

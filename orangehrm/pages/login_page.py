@@ -1,8 +1,8 @@
 from selenium.webdriver.common.by import By
-from .base_page import BasePage
+from .web_page import WebPage
 
 
-class LoginPage(BasePage):
+class LoginPage(WebPage):
     PATH = "/auth/login"
     USERNAME_FLD = (By.NAME, "username")
     PASSWORD_FLD = (By.NAME, "password")
