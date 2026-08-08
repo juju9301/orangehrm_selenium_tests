@@ -25,7 +25,7 @@ class LoginPage(WebPage):
     ALERT_MESSAGE = (By.CSS_SELECTOR, "p.oxd-alert-content-text")
 
     def open(self):
-        return self.go_to(self.PATH)
+        return self.go_to(self.url)
 
     def login(self, username: str, password: str):
         self.fill(*self.USERNAME_FLD, text=username)

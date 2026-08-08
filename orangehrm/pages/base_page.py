@@ -25,11 +25,8 @@ class BasePage:
 
     """Navigation methods"""
 
-    def go_to(self, path: str = "") -> "BasePage":
-        if self.base_url:
-            self.driver.get(self.base_url + path)
-        else:
-            self.driver.get(path)
+    def go_to(self, url: str = "") -> "BasePage":
+        self.driver.get(url)
         return self
 
     """Element finders"""
