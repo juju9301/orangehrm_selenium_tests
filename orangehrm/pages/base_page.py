@@ -1,4 +1,4 @@
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse
 
 from selenium.webdriver.common.by import By, ByType
 from selenium.webdriver.remote.webdriver import WebDriver
