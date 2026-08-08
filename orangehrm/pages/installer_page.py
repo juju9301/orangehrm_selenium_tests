@@ -17,7 +17,7 @@ class InstallerPage(BasePage):
         return self.open_welcome()
 
     def open_welcome(self):
-        self.go_to("/installer/index.php/welcome")
+        self.go_to(self.url)
         return self
 
     def accept_welcome(self):
