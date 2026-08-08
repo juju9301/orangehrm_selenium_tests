@@ -62,7 +62,7 @@ class InstallerFlow:
         self.installer_page.click_button_by_text("Next")
 
     def _confirm_installation(self) -> None:
-        self.installer_page.wait_for_url_change(
+        self.installer_page.wait_for_url_contains(
             "/installer/index.php/installer/confirmation"
         )
         self.installer_page.click_button_by_text("Install")

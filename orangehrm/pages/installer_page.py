@@ -20,16 +20,13 @@ class InstallerPage(BasePage):
         self.go_to("/installer/index.php/welcome")
         return self
 
-    def click_next(self):
-        return self.click_button_by_text("Next")
-
     def accept_welcome(self):
         self.wait.until(EC.url_contains("/installer/index.php/welcome"))
         fresh_installation = self.find_checkbox_or_radio_by_label(
             "radio", "Fresh Installation"
         )
         assert fresh_installation.is_selected()
-        return self.click_next()
+        return self.click_button_by_text("Next")
 
     def accept_license(self):
         self.wait.until(
@@ -136,7 +133,7 @@ class InstallerPage(BasePage):
         else:
             raise TimeoutException("Installation did not reach 100% within timeout")
 
-        return self.click_next()
+        return self.click_button_by_text("Next")
 
     def click_button_by_text(self, button_text: str):
         text_lower = button_text.lower()
