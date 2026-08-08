@@ -17,6 +17,8 @@ from webdriver_manager.firefox import GeckoDriverManager
 
 from orangehrm.pages.login_page import LoginPage
 from orangehrm.pages.dashboard_page import DashboardPage
+from orangehrm.components.sidebar import SidebarComponent
+from orangehrm.components.topbar import TopbarComponent
 from orangehrm.config import BASE_URL
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -41,6 +43,13 @@ def chrome_options() -> Options:
     options.add_argument("--start-maximized")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
+    options.add_argument("--window-size=1920,1080")
+
+    if os.getenv("CI", "").lower() in {"1", "true", "yes"} or os.getenv(
+        "HEADLESS", "0"
+    ).lower() in {"1", "true", "yes"}:
+        options.add_argument("--headless=new")
+
     return options
 
 

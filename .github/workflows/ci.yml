@@ -1,0 +1,150 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  smoke-test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    env:
+      CI: true
+      HEADLESS: true
+      BROWSER: chrome
+      ORANGEHRM_URL: http://localhost:80
+      ORANGEHRM_DB_HOST: mysql
+      ORANGEHRM_DB_PORT: 3306
+      MYSQL_ROOT_USERNAME: root
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: orangehrm
+      MYSQL_USER: orangehrm
+      MYSQL_PASSWORD: orangehrm
+      ENABLED_ADMIN_USERNAME: ${{ secrets.ENABLED_ADMIN_USERNAME }}
+      ENABLED_ADMIN_PASSWORD: ${{ secrets.ENABLED_ADMIN_PASSWORD }}
+      ENABLED_ADMIN_FULL_NAME: ${{ secrets.ENABLED_ADMIN_FULL_NAME }}
+      ENABLED_ESS_USERNAME: ${{ secrets.ENABLED_ESS_USERNAME }}
+      ENABLED_ESS_PASSWORD: ${{ secrets.ENABLED_ESS_PASSWORD }}
+      DISABLED_ESS_USERNAME: ${{ secrets.DISABLED_ESS_USERNAME }}
+      DISABLED_ESS_PASSWORD: ${{ secrets.DISABLED_ESS_PASSWORD }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start MySQL and OrangeHRM containers
+        run: docker compose up -d
+
+      - name: Wait for OrangeHRM to come up
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:80 >/dev/null; then
+              echo "OrangeHRM is reachable"
+              break
+            fi
+            echo "Waiting for OrangeHRM (attempt $i/30)"
+            sleep 10
+          done
+
+          curl -fsS http://localhost:80 >/dev/null || {
+            echo "OrangeHRM did not become ready in time"
+            docker compose ps
+            docker compose logs
+            exit 1
+          }
+
+      - name: Bootstrap OrangeHRM instance
+        run: python scripts/bootstrap_orangehrm.py
+
+      - name: Run smoke tests
+        run: pytest -m smoke
+
+      - name: Cleanup containers
+        if: always()
+        run: docker compose down -v
+
+  full-test:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    env:
+      CI: true
+      HEADLESS: true
+      BROWSER: chrome
+      ORANGEHRM_URL: http://localhost:80
+      ORANGEHRM_DB_HOST: mysql
+      ORANGEHRM_DB_PORT: 3306
+      MYSQL_ROOT_USERNAME: root
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: orangehrm
+      MYSQL_USER: orangehrm
+      MYSQL_PASSWORD: orangehrm
+      ENABLED_ADMIN_USERNAME: ${{ secrets.ENABLED_ADMIN_USERNAME }}
+      ENABLED_ADMIN_PASSWORD: ${{ secrets.ENABLED_ADMIN_PASSWORD }}
+      ENABLED_ADMIN_FULL_NAME: ${{ secrets.ENABLED_ADMIN_FULL_NAME }}
+      ENABLED_ESS_USERNAME: ${{ secrets.ENABLED_ESS_USERNAME }}
+      ENABLED_ESS_PASSWORD: ${{ secrets.ENABLED_ESS_PASSWORD }}
+      DISABLED_ESS_USERNAME: ${{ secrets.DISABLED_ESS_USERNAME }}
+      DISABLED_ESS_PASSWORD: ${{ secrets.DISABLED_ESS_PASSWORD }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start MySQL and OrangeHRM containers
+        run: docker compose up -d
+
+      - name: Wait for OrangeHRM to come up
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:80 >/dev/null; then
+              echo "OrangeHRM is reachable"
+              break
+            fi
+            echo "Waiting for OrangeHRM (attempt $i/30)"
+            sleep 10
+          done
+
+          curl -fsS http://localhost:80 >/dev/null || {
+            echo "OrangeHRM did not become ready in time"
+            docker compose ps
+            docker compose logs
+            exit 1
+          }
+
+      - name: Bootstrap OrangeHRM instance
+        run: python scripts/bootstrap_orangehrm.py
+
+      - name: Run full pytest suite
+        run: pytest
+
+      - name: Cleanup containers
+        if: always()
+        run: docker compose down -v

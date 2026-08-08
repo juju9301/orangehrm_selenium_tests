@@ -1,8 +1,8 @@
 from selenium.webdriver.common.by import By
-from .base_page import BasePage
+from .web_page import WebPage
 
 
-class LoginPage(BasePage):
+class LoginPage(WebPage):
     PATH = "/auth/login"
     USERNAME_FLD = (By.NAME, "username")
     PASSWORD_FLD = (By.NAME, "password")
@@ -25,7 +25,7 @@ class LoginPage(BasePage):
     ALERT_MESSAGE = (By.CSS_SELECTOR, "p.oxd-alert-content-text")
 
     def open(self):
-        return self.go_to(self.PATH)
+        return self.go_to(self.url)
 
     def login(self, username: str, password: str):
         self.fill(*self.USERNAME_FLD, text=username)

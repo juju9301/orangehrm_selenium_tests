@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from selenium.webdriver.common.by import By, ByType
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as EC
@@ -9,21 +11,22 @@ from orangehrm.config import BASE_URL
 
 class BasePage:
     BODY = (By.TAG_NAME, "body")
+    PREFIX = ""
     PATH = ""
 
     def __init__(self, driver: WebDriver, base_url: str = BASE_URL, timeout: int = 5):
         self.driver = driver
         self.base_url = base_url
-        self.url = self.base_url + self.PATH
+        self.url = self.build_url()
         self.wait = WebDriverWait(driver, timeout)
+
+    def build_url(self):
+        return f"{self.base_url}{self.PREFIX}{self.PATH}"
 
     """Navigation methods"""
 
-    def go_to(self, path: str = "") -> "BasePage":
-        if self.base_url:
-            self.driver.get(self.base_url + path)
-        else:
-            self.driver.get(path)
+    def go_to(self, url: str = "") -> "BasePage":
+        self.driver.get(url)
         return self
 
     """Element finders"""
@@ -74,7 +77,12 @@ class BasePage:
         return self.wait.until(EC.invisibility_of_element_located((by, locator)))
 
     def wait_for_url_change(self, old_url: str):
-        self.wait.until(EC.url_changes(old_url))
+        old_path = urlparse(old_url).path
+        self.wait.until(lambda d: urlparse(d.current_url).path != old_path)
+        return self.driver.current_url
+
+    def wait_for_url_contains(self, target_path):
+        self.wait.until(EC.url_contains(target_path))
         return self.driver.current_url
 
     """Actions"""
