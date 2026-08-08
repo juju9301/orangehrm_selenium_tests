@@ -12,7 +12,7 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 
 def chrome_options() -> Options:
     options = Options()
-    # options.add_argument("--headless=new")
+    options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1980,1080")
